@@ -2,6 +2,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { LacunaItem } from "@/app/types";
+import dynamic from "next/dynamic";
+const ContentViewer = dynamic(() => import("@/components/lacuna-item-view"), {
+  ssr: false,
+});
 
 type RevealContextType = {
   isVisible: boolean;
@@ -19,7 +24,7 @@ export function RevealProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-function RevealItem({ content }: { content: string }) {
+function RevealItem({ item }: { item: LacunaItem }) {
   const context = useContext(RevealContext);
   if (!context) {
     throw new Error("RevealItem must be used within a RevealProvider");
@@ -29,7 +34,11 @@ function RevealItem({ content }: { content: string }) {
 
   return (
     <Card>
-      <CardContent className="pt-4">{content}</CardContent>
+      <CardContent className="pt-4">
+        <div className="max-w-5xl mx-auto px-4 my-10">
+          <ContentViewer content={item.content} />
+        </div>
+      </CardContent>
     </Card>
   );
 }

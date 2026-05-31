@@ -1,5 +1,8 @@
 "use client";
-
+import "@blocknote/core/fonts/inter.css";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import "@blocknote/shadcn/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -9,31 +12,38 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import { useForm, Controller } from "react-hook-form";
-import { DataObject } from "@/app/data/items";
 import { saveItem } from "@/app/actions";
 import { useState } from "react";
+import { LacunaItem } from "@/app/types";
+// import { Editor } from "./blocknote-editor";
 
 export default function CreateItemForm() {
+  const editor = useCreateBlockNote();
   const [isOpen, setIsOpen] = useState(false);
-  const form = useForm<DataObject>({
+  const form = useForm<LacunaItem>({
     defaultValues: {
       title: "",
       description: "",
-      content: "",
+      // content: "",
     },
   });
 
-  const onSubmit = async (data: DataObject) => {
-    await saveItem(data);
+  const onSubmit = async (data: LacunaItem) => {
+    const content = JSON.stringify(editor.document);
+    await saveItem({ ...data, content });
     form.reset();
     setIsOpen(false);
   };
 
   return (
     <>
-      <Button className="mb-5" onClick={() => setIsOpen(!isOpen)}>
+      <Button
+        variant={isOpen ? "destructive" : "default"}
+        className="mb-5"
+        onClick={() => setIsOpen(!isOpen)}
+      >
         {isOpen ? "Cancel" : "Create Item +"}
       </Button>
 
@@ -80,7 +90,7 @@ export default function CreateItemForm() {
                   )}
                 />
 
-                <Controller
+                {/* <Controller
                   name="content"
                   control={form.control}
                   render={({ field, fieldState }) => (
@@ -98,7 +108,32 @@ export default function CreateItemForm() {
                       )}
                     </Field>
                   )}
-                />
+                /> */}
+
+                <Field>
+                  <FieldLabel>Content</FieldLabel>
+                  <div className="border border-muted rounded-lg h-75 py-4">
+                    <BlockNoteView
+                      editor={editor}
+                      shadCNComponents={
+                        {
+                          // Pass modified ShadCN components from your project here.
+                          // Otherwise, the default ShadCN components will be used.
+                        }
+                      }
+                    />
+                  </div>
+                  {/* <Textarea
+                        id="content"
+                        className="h-75"
+                        placeholder="Enter you message here.."
+                        required
+                        {...field}
+                      /> */}
+                  {/* {fieldState.invalid && (
+                        <FieldError>{fieldState.error?.message}</FieldError>
+                      )} */}
+                </Field>
 
                 <Field>
                   <Button type="submit" variant={"outline"}>

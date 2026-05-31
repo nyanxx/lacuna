@@ -1,11 +1,24 @@
-export type DataObject = {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-};
+import { createClient } from "@libsql/client";
 
-export const dataObjects: DataObject[] = [
+export const db = createClient({
+  url: "file:./lacuna-items.db",
+});
+
+async function createTable() {
+  await db.execute(`
+        create table if not exists items (
+            id text primary key,
+            title text not null,
+            description text,
+            content text, 
+            created_at text default (datetime('now'))
+        )
+        `);
+
+  console.log("Table created successfully");
+}
+
+const seedData = [
   {
     id: "1",
     title: "The Rise of TypeScript",
@@ -42,3 +55,21 @@ export const dataObjects: DataObject[] = [
       "Rising temperatures, melting ice caps, and extreme weather events emphasize the urgency of climate action. Renewable energy, sustainable agriculture, and international cooperation are vital to mitigating its effects.",
   },
 ];
+
+async function seedTable() {
+  try {
+    for (const { id, content, description, title } of seedData) {
+      await db.execute({
+        sql: "INSERT INTO items (id, content, description, title) VALUES (?, ?, ?, ?)",
+        args: [id, content, description, title],
+      });
+    }
+
+    console.log("db seeded successfully");
+  } catch (error) {
+    console.error("Error inserting data:", (error as Error).message);
+  }
+}
+
+// createTable();
+// seedTable();
